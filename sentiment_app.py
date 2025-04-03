@@ -4,22 +4,33 @@ import tensorflow as tf
 import numpy as np
 import re
 import nltk
+import os
 import pickle
 from nltk.stem import WordNetLemmatizer
 from nltk.corpus import stopwords
 from tensorflow.keras.preprocessing.sequence import pad_sequences
 
 # --- NLTK Setup ---
-try:
-    nltk.data.find('tokenizers/punkt')
-    nltk.data.find('corpora/wordnet')
-    nltk.data.find('corpora/stopwords')
-except LookupError:
-    nltk.download('punkt', download_dir='/home/adminuser/nltk_data', quiet=True)
-    nltk.download('wordnet', download_dir='/home/adminuser/nltk_data', quiet=True)
-    nltk.download('stopwords', download_dir='/home/adminuser/nltk_data', quiet=True)
+NLTK_DATA_PATH = os.path.join(os.path.expanduser("~"), "nltk_data")
 
-nltk.data.path.append('/home/adminuser/nltk_data')
+# Create directory if not exists
+os.makedirs(NLTK_DATA_PATH, exist_ok=True)
+
+# Download resources if missing
+try:
+    nltk.data.find('tokenizers/punkt', paths=[NLTK_DATA_PATH])
+    nltk.data.find('corpora/wordnet', paths=[NLTK_DATA_PATH])
+    nltk.data.find('corpora/stopwords', paths=[NLTK_DATA_PATH])
+except LookupError:
+    try:
+        nltk.download('punkt', download_dir=NLTK_DATA_PATH, quiet=True)
+        nltk.download('wordnet', download_dir=NLTK_DATA_PATH, quiet=True)
+        nltk.download('stopwords', download_dir=NLTK_DATA_PATH, quiet=True)
+    except Exception as e:
+        st.error(f"NLTK setup failed: {str(e)}")
+
+# Update NLTK path
+nltk.data.path.append(NLTK_DATA_PATH)
 
 # --- Constants ---
 MAX_SEQUENCE_LENGTH = 80  # Must match your training
@@ -29,8 +40,8 @@ STOP_WORDS = set(stopwords.words('english'))
 # --- Preprocessing ---
 def preprocess_text(text):
     text = text.lower()
-    text = re.sub(r'[^a-z ]', '', text)  # Remove special chars
-    text = re.sub(r'\s+', ' ', text).strip()  # Remove extra spaces
+    text = re.sub(r'[^a-z ]', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
     text = ' '.join([word for word in text.split() if word not in STOP_WORDS])
     words = nltk.word_tokenize(text)
     return ' '.join([LEMMATIZER.lemmatize(word) for word in words])
@@ -55,18 +66,21 @@ def predict_sentiment(text):
     
     processed_text = preprocess_text(text)
     sequence = tokenizer.texts_to_sequences([processed_text])
-    padded = pad_sequences(sequence, maxlen=MAX_SEQUENCE_LENGTH, padding='post', truncating='post')
+    padded = pad_sequences(sequence, maxlen=MAX_SEQUENCE_LENGTH, 
+                          padding='post', truncating='post')
     prediction = model.predict(padded, verbose=0)[0][0]
     return ("Positive 😊", prediction) if prediction >= 0.5 else ("Negative 😞", prediction)
 
 # --- Streamlit UI ---
 def main():
-    st.set_page_config(page_title="Tweet Sentiment Analyzer", page_icon="🐦", layout="centered")
+    st.set_page_config(page_title="Tweet Sentiment Analyzer", 
+                      page_icon="🐦", layout="centered")
     
     st.title("🐦 Tweet Sentiment Analyzer")
     st.markdown("Analyze sentiment using LSTM model")
     
-    tweet = st.text_area("Enter your tweet:", height=150, placeholder="I really enjoyed this movie...")
+    tweet = st.text_area("Enter your tweet:", height=150, 
+                        placeholder="I really enjoyed this movie...")
     
     if st.button("Analyze", type="primary"):
         if not tweet.strip():
