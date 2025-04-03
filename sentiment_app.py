@@ -1,29 +1,3 @@
-import os
-import sys
-import subprocess
-from pathlib import Path
-
-# ---- Auto-Install Everything ----
-def setup_environment():
-    """Handle all installations without bash"""
-    # 1. Install core packages silently
-    requirements = ["nltk==3.8.1", "tensorflow>=2.16.1"]
-    subprocess.run([sys.executable, "-m", "pip", "install", "--quiet"] + requirements, check=True)
-    
-    # 2. Download NLTK data to a writable directory
-    nltk_data = Path.home() / "nltk_data"
-    os.environ['NLTK_DATA'] = str(nltk_data)
-    
-    try:
-        import nltk
-        nltk.download('punkt', quiet=True)
-        nltk.download('wordnet', quiet=True)
-        nltk.download('stopwords', quiet=True)
-    except Exception as e:
-        print(f"NLTK setup warning: {str(e)}")
-
-# Run setup
-setup_environment()
 
 import streamlit as st
 import tensorflow as tf
