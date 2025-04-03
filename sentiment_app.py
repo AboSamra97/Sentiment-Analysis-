@@ -15,10 +15,10 @@ TOKENIZER_PATH = "tokenizer.pkl"
 
 # --- NLP Setup ---
 try:
-    nlp = spacy.load('en_core_web_sm')
+    nlp = spacy.load('en_core_web_sm', exclude=['parser', 'ner'])
 except:
     spacy.cli.download('en_core_web_sm')
-    nlp = spacy.load('en_core_web_sm')
+    nlp = spacy.load('en_core_web_sm', exclude=['parser', 'ner'])
 
 try:
     stop_words = set(stopwords.words('english'))
