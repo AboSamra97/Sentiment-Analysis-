@@ -73,10 +73,9 @@ def predict_sentiment(text):
 
 # --- Streamlit UI ---
 def main():
-    st.set_page_config(page_title="Tweet Sentiment Analyzer", 
-                      page_icon="🐦", layout="centered")
+    st.set_page_config(page_title="🎥 Sentiment Analyzer",page_icon="🎥", layout="centered")
     
-    st.title("🐦 Tweet Sentiment Analyzer")
+    st.title("🎥 IMDB Movie Reviews Sentiment Analyzer")
     st.markdown("Analyze sentiment using LSTM model")
     
     tweet = st.text_area("Enter your tweet:", height=150, 
@@ -90,12 +89,15 @@ def main():
                 sentiment, confidence = predict_sentiment(tweet)
                 
                 if sentiment:
+    # Calculate confidence for the predicted class
+                    confidence_score = confidence if "Positive" in sentiment else (1 - confidence)
+    
                     color = "#1DA1F2" if "Positive" in sentiment else "#E0245E"
                     st.markdown(f'<h2 style="text-align: center; color: {color}">{sentiment}</h2>', 
-                               unsafe_allow_html=True)
-                    st.markdown(f'<div style="text-align: center; font-size: 1.2rem;">Confidence: {confidence:.2%}</div>', 
-                               unsafe_allow_html=True)
-                    st.progress(float(confidence if "Positive" in sentiment else 1-confidence))
+                            unsafe_allow_html=True)
+                    st.markdown(f'<div style="text-align: center; font-size: 1.2rem;">Confidence: {confidence_score:.2%}</div>', 
+                            unsafe_allow_html=True)
+                    st.progress(float(confidence_score))
                 else:
                     st.error("Analysis failed. Please check model files.")
 
