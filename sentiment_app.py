@@ -78,7 +78,7 @@ def main():
     st.title("🎥 IMDB Movie Reviews Sentiment Analyzer")
     st.markdown("Analyze sentiment using LSTM model")
     
-    tweet = st.text_area("Enter your tweet:", height=150, 
+    tweet = st.text_area("Enter your review:", height=150, 
                         placeholder="I really enjoyed this movie...")
     
     if st.button("Analyze", type="primary"):
